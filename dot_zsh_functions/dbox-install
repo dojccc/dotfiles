@@ -1,0 +1,87 @@
+
+if [ -z "$1" ]; then
+    echo "❌ Musíš zadat název balíčku! Příklad: dbox-install yazi"
+    return 1
+fi
+
+# 1. Pojistka proti Path Traversal a Command Injection
+if [[ ! "$1" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+    echo "❌ Neplatný nebo nebezpečný název balíčku: '$1'"
+    return 1
+fi
+
+local pkg="$1"
+local export_dir="${HOME}/.local/bin"
+
+# 2. Fail-Fast: Ověření a příprava výstupního adresáře na hostiteli
+if ! mkdir -p "$export_dir" 2>/dev/null; then
+    echo "❌ Nelze vytvořit nebo přistoupit k adresáři '$export_dir'."
+    return 1
+fi
+
+# 3. Bezpečná instalace uvnitř kontejneru
+echo "📦 Instaluji $pkg uvnitř arch-boxu..."
+distrobox enter arch-box -- yay -S --needed -- "$pkg"
+if [ $? -ne 0 ]; then
+    echo "❌ Instalace selhala."
+    return 1
+fi
+
+# Pomocná lokální funkce pro vyhledání binárky (DRY princip)
+_dbox_find_bin() {
+    distrobox enter arch-box -- bash -c "command -v '$1'" 2>/dev/null | grep -E '^/' | tail -n 1 | tr -d '\r'
+}
+
+# 4. Vyhledání binárky
+echo "🔍 Hledám cestu k binárce..."
+local bin_path
+bin_path=$(_dbox_find_bin "$pkg")
+
+# 5. Interaktivní fallback kompatibilní se Zsh i Bashem
+if [ -z "$bin_path" ]; then
+    echo "⚠️  Binárka s názvem '$pkg' nebyla automaticky nalezena."
+    if [ ! -t 0 ]; then
+        echo "❌ Nelze se interaktivně zeptat – spusť funkci v terminálu."
+        unset -f _dbox_find_bin
+        return 1
+    fi
+
+    echo -n "🚀 Zadej skutečný název binárky (např. nvim): "
+    local alt_bin
+    read -r alt_bin
+
+    if [ -n "$alt_bin" ]; then
+        if [[ "$alt_bin" =~ ^[a-zA-Z0-9._-]+$ ]]; then
+            bin_path=$(_dbox_find_bin "$alt_bin")
+        else
+            echo "❌ Neplatný název binárky."
+            unset -f _dbox_find_bin
+            return 1
+        fi
+    fi
+fi
+
+# Úklid: Odstraníme pomocnou funkci z paměti shellu, už ji nebudeme potřebovat
+unset -f _dbox_find_bin
+
+# 6. Striktní validace výsledné cesty před exportem
+if [ -z "$bin_path" ]; then
+    echo "❌ Cesta k binárce nebyla nalezena. Export stornován."
+    return 1
+fi
+
+if [[ ! "$bin_path" =~ ^/[a-zA-Z0-9/._-]+$ ]]; then
+    echo "❌ Neočekávaná nebo nebezpečná cesta k binárce: $bin_path"
+    return 1
+fi
+
+# 7. Bezpečný export na hostitele s kontrolou úspěchu
+echo "🔄 Exportuji $bin_path na hostitele..."
+distrobox enter arch-box -- distrobox-export --bin "$bin_path" --export-path "$export_dir"
+
+if [ $? -eq 0 ]; then
+    echo "✅ Hotovo! Nástroj je připraven k použití na Fedoře."
+else
+    echo "❌ Export selhal (zkontroluj stav distroboxu nebo oprávnění složky)."
+    return 1
+fi

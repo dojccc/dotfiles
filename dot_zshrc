@@ -1,0 +1,77 @@
+### Added by Zinit's installer
+if [[ ! -f $HOME/.local/share/zinit/zinit.git/zinit.zsh ]]; then
+    print -P "%F{33} %F{220}Installing %F{33}ZDHARMA-CONTINUUM%F{220} Initiative Plugin Manager...%f%b"
+    command mkdir -p "$HOME/.local/share/zinit" && command chmod g-rwX "$HOME/.local/share/zinit"
+    command git clone https://github.com/zdharma-continuum/zinit "$HOME/.local/share/zinit/zinit.git" && \
+        print -P "%F{33} %F{34}Installation successful.%f%b" || \
+        print -P "%F{160} The clone has failed.%f%b"
+fi
+
+
+source "$HOME/.local/share/zinit/zinit.git/zinit.zsh"
+
+
+# NASTAVENÍ HISTORIE (Bez tohoto Ctrl+R a autosuggestions nefungují napříč okny)
+HISTFILE="$HOME/.zsh_history" # Kam se má historie ukládat
+HISTSIZE=10000                # Kolik příkazů si má držet aktuální session v paměti
+SAVEHIST=10000                # Kolik příkazů se má maximálně uložit do souboru na disk
+
+# CHYTRÉ VOLBY PRO HISTORII
+setopt SHARE_HISTORY          # Sdílí historii napříč všemi otevřenými terminály v reálném čase
+setopt HIST_IGNORE_ALL_DUPS   # Pokud napíšeš stejný příkaz vícekrát, uloží ho jen jednou (nezasírá to historii)
+setopt HIST_IGNORE_SPACE      # Pokud příkaz začne mezerou, neuloží se (skvělé pro hesla nebo tajné věci)
+setopt HIST_REDUCE_BLANKS     # Odstraní přebytečné mezery z příkazů před uložením
+
+
+# IMPORTI STARSHIP (Theme)
+zinit ice from"gh-r" as"command" atclone"./starship init zsh > init.zsh" atpull"%atclone" src"init.zsh"
+zinit light starship/starship
+
+
+# IMPORT FZF
+zinit ice from"gh-r" as"command" pick"fzf"
+zinit light junegunn/fzf
+
+
+# FZF NATIVE SHELL INTEGRATION (Ctrl+R history search)
+source <(fzf --zsh)
+
+
+# Mapování pro Ctrl + šipka vlevo / vpravo (Skákání po slovech)
+bindkey "^[[1;5D" backward-word #SHIFT+LEFT
+bindkey "^[[1;5C" forward-word #SHIFT+RIGHT
+bindkey "^[[1;3D" backward-word #ALT+LEFT
+bindkey "^[[1;3C" forward-word #ALT+RIGHT
+bindkey '^[[H' beginning-of-line #HOME
+bindkey '^[[F' end-of-line #END
+
+# Zinit setup
+autoload -Uz _zinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+
+# PATH & ZOXIDE CONFIGURATION
+export PATH="$HOME/.local/bin:$PATH"
+eval "$(zoxide init --cmd j zsh)"
+
+
+# LOAD CUSTOM FUNCIONS
+# AUTOMATICALY LOAD ALL .zsh from .zsh_funcions
+# Přidání složky do vyhledávací cesty Zsh a líné načtení všech funkcí uvnitř
+fpath=($HOME/.zsh_functions $fpath)
+autoload -Uz $HOME/.zsh_functions/*(N:t)
+
+
+# STANDARD ZSH COMPLETIONS
+autoload -Uz compinit && compinit
+(( ${+_comps} )) && _comps[zinit]=_zinit
+
+
+zinit light Aloxaf/fzf-tab # tab completions with fzf
+zinit light zsh-users/zsh-autosuggestions
+zinit light zdharma-continuum/fast-syntax-highlighting
+
+# opencode
+export PATH=/home/dojc/.opencode/bin:$PATH
+
+eval $(thefuck --alias)

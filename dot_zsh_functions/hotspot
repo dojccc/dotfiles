@@ -1,0 +1,39 @@
+# --- USER CONFIGURATION ---
+local HOTSPOT_SSID="MyHotspot"
+local HOTSPOT_PASS="21jevicneznekonecno"
+local HOTSPOT_NAME="MyHotspot"
+
+# --- AUTOMATIC NETWORK DETECTION (Universal) ---
+# This automatically finds your active Wi-Fi card (wlo1, wlp113s0f0, etc.)
+local WIFI_INTERFACE=$(nmcli -t -f DEVICE,TYPE device | grep :wifi$ | cut -d: -f1 | head -n1)
+
+if [[ -z "$WIFI_INTERFACE" ]]; then
+    print "Error: No Wi-Fi interface found!" >&2
+    return 1
+fi
+
+case "$1" in
+    on)
+        print "Starting hotspot '$HOTSPOT_SSID' on interface $WIFI_INTERFACE..."
+        # Using the exact native command with auto-detected interface
+        sudo nmcli device wifi hotspot ifname "$WIFI_INTERFACE" con-name "$HOTSPOT_NAME" ssid "$HOTSPOT_SSID" band bg password "$HOTSPOT_PASS"
+        nmcli device wifi show-password
+        ;;
+
+    off)
+        print "Turning off hotspot..."
+        # Down the connection and explicitly disconnect the interface to be safe
+        sudo nmcli connection down "$HOTSPOT_NAME" 2>/dev/null
+        sudo nmcli device disconnect "$WIFI_INTERFACE" 2>/dev/null
+        print "Hotspot turned off."
+        ;;
+
+    qr)
+        nmcli device wifi show-password
+        ;;
+
+    *)
+        print "Usage: hotspot [on|off|qr]"
+        return 1
+        ;;
+esac

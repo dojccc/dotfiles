@@ -1,0 +1,70 @@
+local SERVER="https://s.dojc.cc"
+local FILE=""
+local EXPIRY="1-day"
+local CUSTOM_ID=""
+
+while [[ $# -gt 0 ]]; do
+case "$1" in
+    -u) CUSTOM_ID="$2"; shift 2 ;;
+    -d) EXPIRY="$2"; shift 2 ;;
+    *)  FILE="$1"; shift ;;
+esac
+done
+
+if [[ -z "$FILE" ]]; then
+print -r -- "Usage: pingvin <file> [-u id] [-d expiration]" >&2
+return 1
+fi
+
+if [[ ! -f "$FILE" ]]; then
+print -r -- "Error: file '$FILE' does not exist" >&2
+return 1
+fi
+
+if [[ -z "$CUSTOM_ID" ]]; then
+CUSTOM_ID=$(cat /dev/urandom | tr -dc 'a-z0-9' | head -c 8)
+fi
+
+_pingvin_check() {
+local RESPONSE="$1"
+local CONTEXT="$2"
+local ERROR=$(echo "$RESPONSE" | python3 -c "
+import sys, json
+try:
+d = json.load(sys.stdin)
+msg = d.get('message', d.get('error', ''))
+if isinstance(msg, list):
+    for m in msg: print('  - ' + m)
+elif msg:
+    print(msg)
+except:
+pass
+" 2>/dev/null)
+if [[ -n "$ERROR" ]]; then
+    print -r -- "Error - $CONTEXT:" >&2
+    print -r -- "$ERROR" >&2
+    return 1
+fi
+}
+
+local JSON="{\"expiration\": \"$EXPIRY\", \"id\": \"$CUSTOM_ID\", \"recipients\": []}"
+
+local SHARE_RESP=$(curl -s -X POST "$SERVER/api/shares" \
+-H "Content-Type: application/json" \
+-d "$JSON")
+_pingvin_check "$SHARE_RESP" "creating share" || return 1
+
+local SHARE_ID=$(echo "$SHARE_RESP" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+
+local FILENAME=$(basename "$FILE")
+
+local UPLOAD_RESP=$(curl -s -X POST \
+"$SERVER/api/shares/$SHARE_ID/files?name=$FILENAME&chunkIndex=0&totalChunks=1" \
+-H "Content-Type: application/octet-stream" \
+--data-binary "@$FILE")
+_pingvin_check "$UPLOAD_RESP" "uploading file" || return 1
+
+local COMPLETE_RESP=$(curl -s -X POST "$SERVER/api/shares/$SHARE_ID/complete")
+_pingvin_check "$COMPLETE_RESP" "finalizing" || return 1
+
+print -r -- "✅ $SERVER/s/$SHARE_ID"
