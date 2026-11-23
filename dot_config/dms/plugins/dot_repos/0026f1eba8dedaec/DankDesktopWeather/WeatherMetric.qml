@@ -1,7 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Common
-import qs.Widgets
+import qs.DCommon.Widgets
 
 RowLayout {
     id: metric
@@ -18,7 +18,7 @@ RowLayout {
 
     spacing: 2
 
-    DankIcon {
+    DIcon {
         name: metric.icon
         size: metric.compact ? metric.iconSize - 2 : metric.iconSize
         color: metric.accentColor

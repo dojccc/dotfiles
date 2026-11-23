@@ -1,6 +1,40 @@
 {
   "dankKDEConnect": {
     "enabled": true,
-    "selectedDeviceId": "a08114ad67e64bc4afbb1de984c89aac"
+    "selectedDeviceId": "6484c2f71e5d42c1841a21495385246a"
+  },
+  "calculator": {
+    "enabled": true,
+    "trigger": "="
+  },
+  "dankQuickSearch": {
+    "enabled": true,
+    "defaultEngine": "google"
+  },
+  "converter": {
+    "enabled": false
+  },
+  "dankscale": {
+    "enabled": true
+  },
+  "simpleAudioControl": {
+    "enabled": false
+  },
+  "dankClight": {
+    "enabled": true
+  },
+  "pokeDash": {
+    "enabled": true
+  },
+  "dmsScreenshot": {
+    "enabled": true,
+    "saveToDisk": false,
+    "stdout": true,
+    "format": "png",
+    "mode": "all",
+    "quality": "90",
+    "delaySeconds": "0",
+    "scrollInterval": "45",
+    "pipeCommand": ""
   }
 }

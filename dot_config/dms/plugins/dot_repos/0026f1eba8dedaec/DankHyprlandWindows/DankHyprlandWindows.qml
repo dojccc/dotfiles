@@ -121,7 +121,7 @@ QtObject {
             const wsId = ipc?.workspace?.id ?? hyprToplevel?.workspace?.id;
             const wsName = ipc?.workspace?.name || hyprToplevel?.workspace?.name || (wsId ? `Workspace ${wsId}` : "");
 
-            const desktopEntry = DesktopEntries.heuristicLookup(Paths.moddedAppId(appId));
+            const desktopEntry = appId ? DesktopEntries.heuristicLookup(Paths.moddedAppId(appId)) : null;
             const iconPath = Paths.getAppIcon(appId, desktopEntry) || Quickshell.iconPath("application-x-executable", "image-missing");
 
             const toplevelId = `hypr_${address}`;
@@ -166,7 +166,7 @@ QtObject {
         return [
             {
                 icon: "close",
-                text: I18n.tr("Close Window"),
+                text: I18n.trFor("dankHyprlandWindows", "Close Window"),
                 action: () => {
                     closeWindow(address);
                 }

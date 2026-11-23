@@ -2,9 +2,9 @@ import QtQuick
 import Quickshell.Io
 import qs.Common
 import qs.Services
-import qs.Widgets
 import qs.Modules.Plugins
 import "AnsiParser.js" as AnsiParser
+import qs.DCommon.Widgets
 
 PluginComponent {
     id: root
@@ -148,13 +148,13 @@ PluginComponent {
         running: false
 
         stdout: SplitParser {
-            onRead: function(data) {
+            onRead: function (data) {
                 const output = data.trim();
                 root.currentOutput = AnsiParser.parseAnsiToHtml(output);
             }
         }
 
-        onExited: function(exitCode, exitStatus) {
+        onExited: function (exitCode, exitStatus) {
             root.isLoading = false;
             if (exitCode !== 0) {
                 console.warn("CustomActions: Display command failed with code", exitCode);
@@ -167,7 +167,7 @@ PluginComponent {
         command: ["sh", "-c", ""]
         running: false
 
-        onExited: function(exitCode, exitStatus) {
+        onExited: function (exitCode, exitStatus) {
             root.isLoading = false;
             if (exitCode === 0) {
                 if (root.displayCommand) {
@@ -179,7 +179,7 @@ PluginComponent {
         }
     }
 
-    pillClickAction: function() {
+    pillClickAction: function () {
         if (root.clickCommand) {
             root.executeCommand(root.clickCommand);
         }
@@ -193,7 +193,7 @@ PluginComponent {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
-            onClicked: function(mouse) {
+            onClicked: function (mouse) {
                 if (mouse.button === Qt.MiddleButton && root.middleClickCommand) {
                     root.executeCommand(root.middleClickCommand);
                 } else if (mouse.button === Qt.RightButton && root.rightClickCommand) {
@@ -205,7 +205,7 @@ PluginComponent {
                 id: contentRow
                 spacing: Theme.spacingXS
 
-                DankIcon {
+                DIcon {
                     name: root.displayIcon
                     size: Theme.iconSize - 6
                     color: Theme.surfaceText
@@ -235,7 +235,7 @@ PluginComponent {
             hoverEnabled: true
             cursorShape: Qt.PointingHandCursor
 
-            onClicked: function(mouse) {
+            onClicked: function (mouse) {
                 if (mouse.button === Qt.MiddleButton && root.middleClickCommand) {
                     root.executeCommand(root.middleClickCommand);
                 } else if (mouse.button === Qt.RightButton && root.rightClickCommand) {
@@ -247,7 +247,7 @@ PluginComponent {
                 id: contentColumn
                 spacing: Theme.spacingXS
 
-                DankIcon {
+                DIcon {
                     name: root.displayIcon
                     size: Theme.iconSize - 6
                     color: Theme.surfaceText

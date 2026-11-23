@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Common
-import qs.Widgets
 import qs.Modules.Plugins
+import qs.DCommon.Widgets
 
 PluginComponent {
     id: root
@@ -76,7 +76,7 @@ PluginComponent {
                         width: parent.width
                         spacing: Theme.spacingS
 
-                        DankIcon {
+                        DIcon {
                             name: ClightService.getBacklightTypeIcon(modelData)
                             size: 16
                             color: Theme.surfaceVariantText
@@ -131,21 +131,21 @@ PluginComponent {
                 width: parent.width
                 spacing: Theme.spacingS
 
-                DankButton {
+                DButton {
                     text: "Capture"
                     iconName: "photo_camera"
                     enabled: ClightService.available && ClightService.sensorAvailable
                     onClicked: ClightService.capture(true, false)
                 }
 
-                DankButton {
+                DButton {
                     text: ClightService.suspended ? "Resume" : "Pause"
                     iconName: ClightService.suspended ? "play_arrow" : "pause"
                     enabled: ClightService.available
                     onClicked: ClightService.setPaused(!ClightService.suspended)
                 }
 
-                DankButton {
+                DButton {
                     text: ClightService.inhibited ? "Uninhibit" : "Inhibit"
                     iconName: ClightService.inhibited ? "lock_open" : "lock"
                     enabled: ClightService.available
@@ -159,7 +159,7 @@ PluginComponent {
         Row {
             spacing: (root.barConfig?.noBackground ?? false) ? 1 : 2
 
-            DankIcon {
+            DIcon {
                 name: ClightService.available ? ClightService.getBacklightIcon() : "brightness_auto"
                 size: Theme.barIconSize(root.barThickness, -4)
                 color: {
@@ -194,7 +194,7 @@ PluginComponent {
         Column {
             spacing: 1
 
-            DankIcon {
+            DIcon {
                 name: ClightService.available ? ClightService.getBacklightIcon() : "brightness_auto"
                 size: Theme.barIconSize(root.barThickness)
                 color: {
@@ -230,13 +230,12 @@ PluginComponent {
                     parts.push(ClightService.ambientPercent + "% ambient");
                 return parts.join(" • ");
             }
-            showCloseButton: true
 
             headerActions: Component {
                 Row {
                     spacing: 4
 
-                    DankActionButton {
+                    DActionButton {
                         iconName: "refresh"
                         iconColor: Theme.surfaceVariantText
                         buttonSize: 28
@@ -245,7 +244,7 @@ PluginComponent {
                         onClicked: ClightService.refresh()
                     }
 
-                    DankActionButton {
+                    DActionButton {
                         iconName: "photo_camera"
                         iconColor: Theme.surfaceVariantText
                         buttonSize: 28
@@ -255,7 +254,7 @@ PluginComponent {
                         onClicked: ClightService.capture(true, false)
                     }
 
-                    DankActionButton {
+                    DActionButton {
                         iconName: ClightService.suspended ? "play_arrow" : "pause"
                         iconColor: ClightService.suspended ? Theme.warning : Theme.surfaceVariantText
                         buttonSize: 28
@@ -288,7 +287,7 @@ PluginComponent {
                             anchors.horizontalCenter: parent.horizontalCenter
                             spacing: Theme.spacingS
 
-                            DankIcon {
+                            DIcon {
                                 name: "error"
                                 size: Theme.iconSize
                                 color: Theme.error
@@ -401,7 +400,7 @@ PluginComponent {
                                                 anchors.rightMargin: Theme.spacingS
                                                 spacing: Theme.spacingS
 
-                                                DankIcon {
+                                                DIcon {
                                                     name: ClightService.getBacklightTypeIcon(modelData)
                                                     size: 18
                                                     color: Theme.primary
@@ -579,7 +578,7 @@ PluginComponent {
                                     Row {
                                         spacing: Theme.spacingXS
 
-                                        DankIcon {
+                                        DIcon {
                                             name: "wb_sunny"
                                             size: 14
                                             color: Theme.warning
@@ -606,7 +605,7 @@ PluginComponent {
                                     Row {
                                         spacing: Theme.spacingXS
 
-                                        DankIcon {
+                                        DIcon {
                                             name: "nightlight"
                                             size: 14
                                             color: Theme.secondary
@@ -633,7 +632,7 @@ PluginComponent {
                                     Row {
                                         spacing: Theme.spacingXS
 
-                                        DankIcon {
+                                        DIcon {
                                             name: "location_on"
                                             size: 14
                                             color: Theme.surfaceVariantText
@@ -711,7 +710,7 @@ PluginComponent {
                         width: parent.width
                         spacing: Theme.spacingS
 
-                        DankToggle {
+                        DToggle {
                             width: (parent.width - parent.spacing) / 2
                             text: "Auto Calibrate"
                             checked: !ClightService.blNoAutoCalib
@@ -719,7 +718,7 @@ PluginComponent {
                             onToggled: isChecked => ClightService.setBacklightProp("NoAutoCalib", !isChecked)
                         }
 
-                        DankToggle {
+                        DToggle {
                             width: (parent.width - parent.spacing) / 2
                             text: "Smooth"
                             checked: !ClightService.blNoSmooth
@@ -727,7 +726,7 @@ PluginComponent {
                         }
                     }
 
-                    DankToggle {
+                    DToggle {
                         width: parent.width
                         text: "Inhibit Brightness Control"
                         description: "Prevent automatic brightness adjustments"
@@ -738,5 +737,4 @@ PluginComponent {
             }
         }
     }
-
 }

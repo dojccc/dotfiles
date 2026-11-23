@@ -75,3 +75,11 @@ zinit light zdharma-continuum/fast-syntax-highlighting
 export PATH=/home/dojc/.opencode/bin:$PATH
 
 eval $(thefuck --alias)
+
+# DNF & Flatpak aliasy
+alias dnfu='sudo dnf upgrade --refresh'
+alias dnfi='sudo dnf install'
+alias dnfs='dnf search'
+alias fpi='flatpak install'
+alias fps='flatpak search'
+
